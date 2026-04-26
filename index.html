@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Death Note | Aesthetic Web Notepad</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#3e2723;font-family:Georgia,serif;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:20px;color:#3e2723}
+.app{width:100%;max-width:860px;display:flex;flex-direction:column;gap:14px}
+.toolbar{background:#4e342e;padding:10px 14px;border-radius:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;top:10px;z-index:100;border:1px solid #6d4c41}
+.grp{display:flex;gap:4px;align-items:center;padding-right:10px;border-right:1px solid #6d4c41}
+.grp:last-child{border-right:none;padding-right:0}
+button,select,input[type=color]{background:#efebe9;border:1px solid #d7ccc8;color:#3e2723;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:Georgia,serif;font-size:13px;transition:background .15s,transform .1s;line-height:1.4}
+button:hover{background:#d7ccc8;transform:translateY(-1px)}
+button:active{transform:translateY(1px)}
+select{padding:5px 6px}
+input[type=color]{width:32px;height:30px;padding:2px 3px;cursor:pointer;border-radius:5px}
+button.active{background:#5d4037;color:#fff;border-color:#4e342e;box-shadow:inset 0 2px 4px rgba(0,0,0,.3)}
+button.active:hover{background:#6d4c41}
+.btn-align.active{background:#5d4037;color:#fff;border-color:#4e342e;box-shadow:inset 0 2px 4px rgba(0,0,0,.3)}
+.btn-save{background:#5d4037;color:#efebe9;border:1px solid #4e342e;font-weight:bold}
+.btn-save:hover{background:#6d4c41;color:#fff}
+.btn-new{background:#8d6e63;color:#fff;border-color:#795548}
+.btn-new:hover{background:#a1887f}
+.label{font-size:11px;color:#d7ccc8;letter-spacing:.5px;user-select:none}
+.paper-wrap{filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
+.paper{background:#fdfaf6;min-height:78vh;padding:55px 55px 55px 80px;border-radius:3px;position:relative;line-height:1.85}
+.paper::before{content:'';position:absolute;top:0;left:62px;height:100%;width:1px;background:rgba(180,100,100,.25)}
+.paper::after{content:'';position:absolute;top:0;left:0;width:62px;height:100%;background:#f5f0eb;border-right:1px solid #e8e0d8}
+#editor{outline:none;font-size:18px;min-height:60vh;word-wrap:break-word;position:relative;z-index:1}
+#editor:empty::before{content:"Write the name here\2026";color:#bbb;font-style:italic;pointer-events:none}
+.footer{background:#4e342e;border-radius:8px;padding:7px 14px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#bcaaa4;border:1px solid #6d4c41}
+.save-menu{position:relative}
+.save-dropdown{display:none;position:absolute;top:110%;left:0;background:#3e2723;border:1px solid #8d6e63;border-radius:6px;overflow:hidden;z-index:200;min-width:155px;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+.save-dropdown.open{display:block}
+.save-dropdown button{display:block;width:100%;border:none;border-radius:0;text-align:left;padding:9px 14px;background:#3e2723;color:#efebe9;border-bottom:1px solid #5d4037;font-size:13px}
+.save-dropdown button:last-child{border-bottom:none}
+.save-dropdown button:hover{background:#5d4037;color:#fff;transform:none}
+@media(max-width:600px){
+    body{padding:8px}
+    .paper{padding:30px 20px 30px 40px}
+    .paper::after{width:30px}
+    .paper::before{left:30px}
+    .toolbar{gap:6px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- ── TOOLBAR ── -->
+    <div class="toolbar">
+
+        <!-- Formatting -->
+        <div class="grp">
+            <button id="btn-bold"      onclick="toggleFmt('bold','btn-bold')"              title="Bold"><b>B</b></button>
+            <button id="btn-italic"    onclick="toggleFmt('italic','btn-italic')"          title="Italic"><i>I</i></button>
+            <button id="btn-underline" onclick="toggleFmt('underline','btn-underline')"    title="Underline"><u>U</u></button>
+            <button id="btn-strike"    onclick="toggleFmt('strikeThrough','btn-strike')"   title="Strikethrough"><s>S</s></button>
+        </div>
+
+        <!-- Alignment -->
+        <div class="grp">
+            <button id="btn-left"   class="btn-align active" onclick="setAlign('justifyLeft','btn-left')"     title="Align left">&#9776;</button>
+            <button id="btn-center" class="btn-align"        onclick="setAlign('justifyCenter','btn-center')" title="Center">&#9644;</button>
+            <button id="btn-right"  class="btn-align"        onclick="setAlign('justifyRight','btn-right')"   title="Align right">&#9782;</button>
+        </div>
+
+        <!-- Font & Size -->
+        <div class="grp">
+            <select onchange="cmd('fontName', this.value)" title="Font family">
+                <option value="Georgia">Georgia</option>
+                <option value="Arial">Arial</option>
+                <option value="Courier New">Courier</option>
+                <option value="Times New Roman">Times</option>
+                <option value="Palatino Linotype">Palatino</option>
+            </select>
+            <select onchange="cmd('fontSize', this.value)" title="Font size">
+                <option value="3">Normal</option>
+                <option value="1">Tiny</option>
+                <option value="2">Small</option>
+                <option value="4">Medium</option>
+                <option value="5">Large</option>
+                <option value="6">XL</option>
+                <option value="7">XXL</option>
+            </select>
+        </div>
+
+        <!-- Text Color -->
+        <div class="grp">
+            <span class="label">Color</span>
+            <input type="color" id="colorPick" value="#000000" onchange="cmd('foreColor', this.value)" title="Text color">
+        </div>
+
+        <!-- Undo / Redo -->
+        <div class="grp">
+            <button onclick="cmd('undo')" title="Undo">&#8617;</button>
+            <button onclick="cmd('redo')" title="Redo">&#8618;</button>
+        </div>
+
+        <!-- File Actions -->
+        <div class="grp">
+            <button class="btn-new" onclick="newFile()">New</button>
+            <button onclick="document.getElementById('openIn').click()">Open</button>
+            <input type="file" id="openIn" hidden accept=".html,.txt" onchange="openFile(event)">
+            <div class="save-menu" id="saveMenu">
+                <button class="btn-save" onclick="toggleSave()">Save &#9660;</button>
+                <div class="save-dropdown" id="saveDrop">
+                    <button onclick="saveTxt()">Save as TXT</button>
+                    <button onclick="saveHtml()">Save as HTML</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- ── END TOOLBAR ── -->
+
+    <!-- ── PAPER ── -->
+    <div class="paper-wrap">
+        <div class="paper">
+            <div id="editor" contenteditable="true" spellcheck="false"></div>
+        </div>
+    </div>
+
+    <!-- ── FOOTER ── -->
+    <div class="footer">
+        <span id="wc">Words: 0 &nbsp;|&nbsp; Characters: 0</span>
+        <span>Death Note &nbsp;&#10022;&nbsp; <span id="saved" style="color:#a5d6a7">All changes tracked</span></span>
+    </div>
+
+</div>
+<!-- ── END APP ── -->
+
+<script>
+    const ed      = document.getElementById('editor');
+    const wc      = document.getElementById('wc');
+    const savedEl = document.getElementById('saved');
+
+    /* ── Core execCommand wrapper ── */
+    function cmd(name, val) {
+        document.execCommand(name, false, val || null);
+        ed.focus();
+    }
+
+    /* ── Toggle bold / italic / underline / strikethrough ── */
+    function toggleFmt(command, btnId) {
+        cmd(command);
+        updateActiveStates();
+    }
+
+    /* ── Set text alignment (only one can be active at a time) ── */
+    function setAlign(command, btnId) {
+        cmd(command);
+        ['btn-left', 'btn-center', 'btn-right'].forEach(id => {
+            document.getElementById(id).classList.remove('active');
+        });
+        document.getElementById(btnId).classList.add('active');
+        ed.focus();
+    }
+
+    /* ── Sync button highlight states with actual formatting ── */
+    function updateActiveStates() {
+        const fmtMap = {
+            'btn-bold'      : 'bold',
+            'btn-italic'    : 'italic',
+            'btn-underline' : 'underline',
+            'btn-strike'    : 'strikeThrough'
+        };
+        for (const [btnId, fmtCmd] of Object.entries(fmtMap)) {
+            document.getElementById(btnId)
+                .classList.toggle('active', document.queryCommandState(fmtCmd));
+        }
+        const alignMap = {
+            'btn-left'   : 'justifyLeft',
+            'btn-center' : 'justifyCenter',
+            'btn-right'  : 'justifyRight'
+        };
+        for (const [btnId, alignCmd] of Object.entries(alignMap)) {
+            document.getElementById(btnId)
+                .classList.toggle('active', document.queryCommandState(alignCmd));
+        }
+    }
+
+    /* ── Word / character counter ── */
+    function updateCount() {
+        const txt   = ed.innerText || '';
+        const words = txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length;
+        wc.textContent = `Words: ${words} \u00A0|\u00A0 Characters: ${txt.replace(/\n/g, '').length}`;
+    }
+
+    /* ── Editor event listeners ── */
+    ed.addEventListener('input',  () => { updateCount(); markUnsaved(); });
+    ed.addEventListener('keyup',  updateActiveStates);
+    ed.addEventListener('mouseup', updateActiveStates);
+    ed.addEventListener('click',  updateActiveStates);
+
+    /* ── New file ── */
+    function newFile() {
+        if (confirm('Start a new note? Current content will be cleared.')) {
+            ed.innerHTML = '';
+            updateCount();
+            savedEl.textContent = 'All changes tracked';
+            savedEl.style.color = '#a5d6a7';
+        }
+    }
+
+    /* ── Save dropdown toggle ── */
+    function toggleSave() {
+        document.getElementById('saveDrop').classList.toggle('open');
+    }
+    document.addEventListener('click', e => {
+        if (!document.getElementById('saveMenu').contains(e.target)) {
+            document.getElementById('saveDrop').classList.remove('open');
+        }
+    });
+
+    /* ── Save as plain text ── */
+    function saveTxt() {
+        const txt = ed.innerText || ed.textContent;
+        if (!txt.trim()) { alert('The note is empty!'); return; }
+        download(txt, 'death_note.txt', 'text/plain');
+        markSaved();
+    }
+
+    /* ── Save as styled HTML ── */
+    function saveHtml() {
+        const content = ed.innerHTML;
+        if (!content.trim()) { alert('The note is empty!'); return; }
+        const full = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Death Note</title>
+  <style>
+    body { font-family: Georgia, serif; max-width: 700px; margin: 40px auto;
+           line-height: 1.8; font-size: 18px; color: #3e2723; }
+  </style>
+</head>
+<body>${content}</body>
+</html>`;
+        download(full, 'death_note.html', 'text/html');
+        markSaved();
+    }
+
+    /* ── Generic download helper ── */
+    function download(content, filename, type) {
+        const blob = new Blob([content], { type });
+        const a    = document.createElement('a');
+        a.href     = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        document.getElementById('saveDrop').classList.remove('open');
+    }
+
+    /* ── Status helpers ── */
+    function markSaved() {
+        savedEl.textContent = 'Saved!';
+        savedEl.style.color = '#a5d6a7';
+    }
+    function markUnsaved() {
+        savedEl.textContent = 'Unsaved changes';
+        savedEl.style.color = '#ffcc80';
+    }
+
+    /* ── Open a file from disk ── */
+    function openFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const c = ev.target.result;
+            ed.innerHTML = file.name.endsWith('.html')
+                ? c
+                : c.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+            updateCount();
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    }
+
+    /* ── Warn before accidental tab close ── */
+    window.onbeforeunload = () => {
+        if (ed.innerHTML.length > 0) return 'You have unsaved changes!';
+    };
+
+    /* ── Init ── */
+    updateCount();
+    ed.focus();
+</script>
+
+</body>
+</html>
